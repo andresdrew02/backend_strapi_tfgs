@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "integrante_tiendas",
+  "info": {
+    "singularName": "integrante-tienda",
+    "pluralName": "integrante-tiendas",
+    "displayName": "Integrante_tienda"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "usuario": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "admin::user"
+    },
+    "tienda": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::tienda.tienda"
+    }
+  }
+}

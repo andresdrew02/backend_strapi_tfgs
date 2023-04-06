@@ -1,0 +1,32 @@
+{
+  "kind": "collectionType",
+  "collectionName": "resenia_tiendas",
+  "info": {
+    "singularName": "resenia-tienda",
+    "pluralName": "resenia-tiendas",
+    "displayName": "Resenia_tienda",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "usuario": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "admin::user"
+    },
+    "resenia": {
+      "type": "text"
+    },
+    "valoracion": {
+      "type": "decimal"
+    },
+    "tienda": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::tienda.tienda"
+    }
+  }
+}

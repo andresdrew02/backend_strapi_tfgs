@@ -1,0 +1,49 @@
+{
+  "kind": "collectionType",
+  "collectionName": "pedidos",
+  "info": {
+    "singularName": "pedido",
+    "pluralName": "pedidos",
+    "displayName": "Pedido",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "usuario": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "admin::user"
+    },
+    "precio_final": {
+      "type": "decimal",
+      "required": true
+    },
+    "cantidad_final": {
+      "type": "decimal",
+      "required": true
+    },
+    "metodo_pago": {
+      "type": "string",
+      "required": true
+    },
+    "estado": {
+      "type": "enumeration",
+      "enum": [
+        "pendiente_pago",
+        "rechazado",
+        "pagado",
+        "enviado"
+      ],
+      "default": "pendiente_pago",
+      "required": true
+    },
+    "oferta": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::oferta.oferta"
+    }
+  }
+}

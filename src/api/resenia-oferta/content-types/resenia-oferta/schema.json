@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "resenia_ofertas",
+  "info": {
+    "singularName": "resenia-oferta",
+    "pluralName": "resenia-ofertas",
+    "displayName": "Resenia_oferta",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "resenia": {
+      "type": "text"
+    },
+    "valoracion": {
+      "type": "decimal",
+      "required": true
+    },
+    "usuario": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "admin::user"
+    },
+    "oferta": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::oferta.oferta"
+    }
+  }
+}

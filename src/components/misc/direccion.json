@@ -1,0 +1,41 @@
+{
+  "collectionName": "components_misc_direccions",
+  "info": {
+    "displayName": "direccion",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "calle": {
+      "type": "string",
+      "required": true
+    },
+    "tipo_via": {
+      "type": "string",
+      "required": true
+    },
+    "cp": {
+      "type": "integer",
+      "required": true
+    },
+    "ciudad": {
+      "type": "string",
+      "required": true
+    },
+    "poblacion": {
+      "type": "string",
+      "required": true
+    },
+    "pais": {
+      "type": "string",
+      "required": true
+    },
+    "numero": {
+      "type": "string",
+      "required": true
+    },
+    "portal": {
+      "type": "string"
+    }
+  }
+}

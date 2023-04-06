@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "contactos",
+  "info": {
+    "singularName": "contacto",
+    "pluralName": "contactos",
+    "displayName": "Contacto"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "usuario_contacto": {
+      "type": "email",
+      "required": true
+    },
+    "motivo": {
+      "type": "string",
+      "required": true
+    },
+    "detalle": {
+      "type": "text",
+      "required": true
+    }
+  }
+}
