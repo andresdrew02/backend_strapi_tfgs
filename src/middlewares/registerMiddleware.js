@@ -25,7 +25,7 @@ function checkCp(str){
 //middleware para establecer una política de contraseña y comprobar que el usuario sea mayor de 18 años
 module.exports = (config, { strapi }) => {
   return async (ctx, next) => {
-    if (ctx.request.url === '/api/auth/local/register' && ctx.request.method === 'POST'){
+    if ((ctx.request.url === '/api/auth/local/register') && ctx.request.method === 'POST'){
       const fecha = ctx.request.body.fecha_nacimiento
       const pwd = ctx.request.body.password
       const codigopostal = ctx.request.body.direccion.cp
