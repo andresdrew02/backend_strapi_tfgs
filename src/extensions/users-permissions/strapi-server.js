@@ -82,32 +82,32 @@ module.exports = (plugin) => {
         const { currentPassword, password, passwordConfirmation } = ctx.request.body
 
         if (currentPassword === undefined || password === undefined || passwordConfirmation === undefined) {
-            return ctx.badRequest('Bad request', { message: 'Debe de introducir todos los parametros obligatorios.'})
+            return ctx.badRequest('Bad request', { message: 'Debe de introducir todos los parametros obligatorios.' })
         }
 
         if (password !== passwordConfirmation) {
-            return ctx.badRequest('Bad request', { message: 'Las contraseñas no coinciden'})
+            return ctx.badRequest('Bad request', { message: 'Las contraseñas no coinciden' })
         }
 
         if (user.provider !== 'local') {
-            return ctx.badRequest('Bad request', { message: 'Las cuentas de Google no pueden cambiar sus contraseñas, ya que no tienen. Si desea tener una cuenta con contraseña propia, cierre sesión y cree otra cuenta con otra dirección de correo distinta, si desea usar esta dirección de correo, contacte con soporte técnico.'})
+            return ctx.badRequest('Bad request', { message: 'Las cuentas de Google no pueden cambiar sus contraseñas, ya que no tienen. Si desea tener una cuenta con contraseña propia, cierre sesión y cree otra cuenta con otra dirección de correo distinta, si desea usar esta dirección de correo, contacte con soporte técnico.' })
         }
 
         const validPassword = await strapi.plugins['users-permissions'].services.user.validatePassword(currentPassword, user.password)
 
         if (!validPassword) {
-            return ctx.badRequest('Bad request', { message: 'La contraseña introducida no coincide con su contraseña actual'})
+            return ctx.badRequest('Bad request', { message: 'La contraseña introducida no coincide con su contraseña actual' })
         }
 
-        const samePassword = await strapi.plugins['users-permissions'].services.user.validatePassword(password,user.password)
+        const samePassword = await strapi.plugins['users-permissions'].services.user.validatePassword(password, user.password)
 
-        if (samePassword){
-            return ctx.badRequest('Bad request', { message: 'La contraseña que ha introducido es la misma que su contraseña actual'})
+        if (samePassword) {
+            return ctx.badRequest('Bad request', { message: 'La contraseña que ha introducido es la misma que su contraseña actual' })
         }
 
         let re = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
         if (!re.test(password)) {
-            return ctx.badRequest('Bad request', { message: 'La contraseña no coincide con los criterios mínimos de seguridad, la contraseña debe de tener mínimo 8 carácteres, con al menos una letra mayuscula, una letra minúscula, un número y un símbolo'})
+            return ctx.badRequest('Bad request', { message: 'La contraseña no coincide con los criterios mínimos de seguridad, la contraseña debe de tener mínimo 8 carácteres, con al menos una letra mayuscula, una letra minúscula, un número y un símbolo' })
         }
 
         //const bcrypt = require("bcryptjs")
@@ -117,7 +117,7 @@ module.exports = (plugin) => {
         */
 
         await strapi.entityService.update('plugin::users-permissions.user', ctx.state.user.id, {
-            data:{
+            data: {
                 resetPasswordToken: null,
                 password: password
             }
@@ -130,6 +130,78 @@ module.exports = (plugin) => {
             method: 'POST',
             path: '/user/me/changePassword',
             handler: 'user.changePassword',
+            config: {
+                prefix: '',
+                policies: []
+            }
+        }
+    )
+
+    //Checkear JWT
+    plugin.controllers.user.checkToken = async (ctx) => {
+        const { token } = JSON.parse(ctx.request.body)
+
+        if (!token) {
+            return ctx.response.status = 400
+        }
+
+        try {
+            const obj = await strapi.plugins["users-permissions"].services.jwt.verify(token)
+            const { id } = obj
+            if (!id) {
+                return ctx.response.status = 422
+            }
+
+            const user = await strapi.entityService.findOne('plugin::users-permissions.user', id)
+            if (!user) {
+                return ctx.response.status = 404
+            }
+        }
+        catch (err) {
+            return ctx.response.status = 400
+        }
+        return ctx.response.status = 200
+    }
+
+    plugin.routes['content-api'].routes.push(
+        {
+            method: 'POST',
+            path: '/user/checkToken',
+            handler: 'user.checkToken',
+            config: {
+                prefix: '',
+                policies: []
+            }
+        }
+    )
+
+    plugin.controllers.user.checkResetPasswordToken = async (ctx) => {
+        const body = ctx.request.body
+        const { token } = JSON.parse(body)
+
+        if (!token || token === undefined || token === null){
+            return ctx.response.status = 404
+        }
+
+        try {
+            const entry = await strapi.query('plugin::users-permissions.user').findOne({
+                where: { resetPasswordToken: token }
+            })
+            if (entry === undefined || entry === null){
+                return ctx.response.status = 404
+            }
+            return ctx.response.status = 200
+        }
+        catch (err) {
+            return ctx.response.status = 404
+        }
+    }
+
+    plugin.routes['content-api'].routes.push(
+        {
+            method: 'POST',
+            path: '/user/checkResetToken',
+            handler: 'user.checkResetPasswordToken',
             config: {
                 prefix: '',
                 policies: []
