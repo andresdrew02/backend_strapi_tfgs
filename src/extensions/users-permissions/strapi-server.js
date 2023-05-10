@@ -28,6 +28,7 @@ module.exports = (plugin) => {
         }
     )
 
+    //modificar perfil de usuario
     plugin.controllers.user.updateMe = async (ctx) => {
         if (!ctx.state.user || !ctx.state.user.id) {
             return ctx.response.status = 401
@@ -58,12 +59,77 @@ module.exports = (plugin) => {
             ctx.response.status = 200
         })
     }
-
     plugin.routes['content-api'].routes.push(
         {
             method: 'PUT',
-            path: '/user/me/update',
+            path: '/user/me/updateMe',
             handler: 'user.updateMe',
+            config: {
+                prefix: '',
+                policies: []
+            }
+        }
+    )
+
+    //modificar contraseña
+    plugin.controllers.user.changePassword = async (ctx) => {
+        if (!ctx.state.user || !ctx.state.user.id) {
+            throw new UnauthorizedError('No estás autorizado para realizar esta acción')
+        }
+
+        const user = await strapi.entityService.findOne('plugin::users-permissions.user', ctx.state.user.id)
+
+        const { currentPassword, password, passwordConfirmation } = ctx.request.body
+
+        if (currentPassword === undefined || password === undefined || passwordConfirmation === undefined) {
+            return ctx.badRequest('Bad request', { message: 'Debe de introducir todos los parametros obligatorios.'})
+        }
+
+        if (password !== passwordConfirmation) {
+            return ctx.badRequest('Bad request', { message: 'Las contraseñas no coinciden'})
+        }
+
+        if (user.provider !== 'local') {
+            return ctx.badRequest('Bad request', { message: 'Las cuentas de Google no pueden cambiar sus contraseñas, ya que no tienen. Si desea tener una cuenta con contraseña propia, cierre sesión y cree otra cuenta con otra dirección de correo distinta, si desea usar esta dirección de correo, contacte con soporte técnico.'})
+        }
+
+        const validPassword = await strapi.plugins['users-permissions'].services.user.validatePassword(currentPassword, user.password)
+
+        if (!validPassword) {
+            return ctx.badRequest('Bad request', { message: 'La contraseña introducida no coincide con su contraseña actual'})
+        }
+
+        const samePassword = await strapi.plugins['users-permissions'].services.user.validatePassword(password,user.password)
+
+        if (samePassword){
+            return ctx.badRequest('Bad request', { message: 'La contraseña que ha introducido es la misma que su contraseña actual'})
+        }
+
+        let re = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+        if (!re.test(password)) {
+            return ctx.badRequest('Bad request', { message: 'La contraseña no coincide con los criterios mínimos de seguridad, la contraseña debe de tener mínimo 8 carácteres, con al menos una letra mayuscula, una letra minúscula, un número y un símbolo'})
+        }
+
+        //const bcrypt = require("bcryptjs")
+        /*
+            Antes hacia falta hashear la contraseña y en el propio sevricio venía un metodo para hashearla, ahora
+            el propio entityService lo hace internamente si detecta que el campo a editar es una contraseña
+        */
+
+        await strapi.entityService.update('plugin::users-permissions.user', ctx.state.user.id, {
+            data:{
+                resetPasswordToken: null,
+                password: password
+            }
+        })
+        return ctx.response.status = 200
+    }
+
+    plugin.routes['content-api'].routes.push(
+        {
+            method: 'POST',
+            path: '/user/me/changePassword',
+            handler: 'user.changePassword',
             config: {
                 prefix: '',
                 policies: []
