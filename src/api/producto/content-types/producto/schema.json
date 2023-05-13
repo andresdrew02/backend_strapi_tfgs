@@ -23,13 +23,15 @@
     "precio_unidad": {
       "type": "decimal"
     },
-    "categoria": {
-      "type": "string"
-    },
     "tienda": {
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::tienda.tienda"
+    },
+    "categoria": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::categoria.categoria"
     }
   }
 }
