@@ -25,6 +25,9 @@
       "relation": "manyToOne",
       "target": "plugin::users-permissions.user",
       "inversedBy": "tiendas"
+    },
+    "slug": {
+      "type": "string"
     }
   }
 }

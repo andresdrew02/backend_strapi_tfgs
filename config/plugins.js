@@ -13,6 +13,16 @@ module.exports = ({ env }) => ({
       },
     },
   },
+  slugify: {
+    enabled: true,
+    config: {
+      contentTypes: {
+        tienda: {
+          field: 'slug',
+          references: 'nombre',
+        },
+      },
+    },
+  }
 });
 
-  

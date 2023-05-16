@@ -7,7 +7,7 @@
 const { createCoreController } = require('@strapi/strapi').factories;
 
 const checkName = (str) => {
-    const regexp = /^[a-zA-Z]{10,32}$/
+    const regexp = /^[a-z A-Z]{10,32}$/
     const checker = new RegExp(regexp)
     return checker.test(str)
 }
@@ -123,5 +123,30 @@ module.exports = createCoreController('api::tienda.tienda', ({ strapi }) => ({
 
         return ctx.response.status = 403
 
+    },
+    async findOne(ctx){
+        const { id: slug } = ctx.params //esto va a ser el slug
+        const tienda = await strapi.db.query('api::tienda.tienda').findOne({
+            select: ['id','nombre','descripcion','slug'],
+            where: { slug: slug },
+            populate: {admin_tienda: {
+                select: ['id', 'username']
+            }}
+        })
+        const ofertas = await strapi.entityService.findMany('api::oferta.oferta',{
+            filters: {tienda: tienda.id},
+            populate: {
+                tienda:true,
+                producto:{
+                    populate: {
+                        categoria: true
+                    }
+                },
+                fotos:true
+            },
+            sort: { createdAt: 'DESC' }
+        })
+
+        return this.transformResponse(tienda, ofertas);
     }
 }));
