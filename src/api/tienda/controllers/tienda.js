@@ -6,15 +6,18 @@
 
 const { createCoreController } = require('@strapi/strapi').factories;
 
-const checkName = (str) => {
-    const regexp = /^[a-z A-Z]{10,32}$/
+const numberRegex = /^\+?\d{1,3}[-.\s]?\(?\d{1,}\)?[-.\s]?\d{1,}[-.\s]?\d{1,}[-.\s]?\d{1,}$/
+const nameRegex = /^[a-zA-Z ]{10,32}$/
+const mailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const checkRegexp = (str, regexp) => {
     const checker = new RegExp(regexp)
     return checker.test(str)
 }
 
 module.exports = createCoreController('api::tienda.tienda', ({ strapi }) => ({
     async create(ctx) {
-        const { nombre, descripcion } = ctx.request.body
+        const { nombre, descripcion, email, telefono } = ctx.request.body
         const user = ctx.state.user
 
         if (!ctx.state.user) {
@@ -38,8 +41,16 @@ module.exports = createCoreController('api::tienda.tienda', ({ strapi }) => ({
             return ctx.response.status = 409
         }
 
-        if (!checkName(nombre)) {
-            return ctx.response.status = 400
+        if (!checkRegexp(nombre,nameRegex)) {
+            return ctx.response.status(400)
+        }
+
+        if (telefono !== '' && !checkRegexp(telefono,numberRegex)){
+            return ctx.response.status(400)
+        }
+    
+        if (email !== '' && !checkRegexp(email,mailRegex)){
+            return ctx.response.status(400)
         }
 
         //hay un máximo de 3 tiendas por usuario, checkeamos que no tenga mas de 3 tiendas...
@@ -55,6 +66,8 @@ module.exports = createCoreController('api::tienda.tienda', ({ strapi }) => ({
             data: {
                 nombre: nombre,
                 descripcion: descripcion,
+                email: email === '' ? null : email,
+                telefono: telefono === '' ? null : telefono,
                 admin_tienda: ctx.state.user.id
             }
         })
@@ -94,7 +107,7 @@ module.exports = createCoreController('api::tienda.tienda', ({ strapi }) => ({
     async update(ctx) {
         const user = ctx.state.user
         const { id } = ctx.params
-        const { nombre, descripcion } = ctx.request.body
+        const { nombre, descripcion, email, telefono } = ctx.request.body
 
         if (!user || !user.id) {
             return ctx.response.status = 403
@@ -103,8 +116,16 @@ module.exports = createCoreController('api::tienda.tienda', ({ strapi }) => ({
             return ctx.response.status = 400
         }
 
-        if (!checkName(nombre)) {
-            return ctx.response.status = 400
+        if (!checkRegexp(nombre,nameRegex)) {
+            return ctx.response.status(400)
+        }
+
+        if (telefono !== '' && !checkRegexp(telefono,numberRegex)){
+            return ctx.response.status(400)
+        }
+    
+        if (email !== '' && !checkRegexp(email,mailRegex)){
+            return ctx.response.status(400)
         }
 
         const tienda = await strapi.entityService.findOne('api::tienda.tienda', id, {
@@ -115,7 +136,9 @@ module.exports = createCoreController('api::tienda.tienda', ({ strapi }) => ({
             const tiendaEditada = await strapi.entityService.update('api::tienda.tienda', id, {
                 data: {
                     nombre: nombre,
-                    descripcion: descripcion
+                    descripcion: descripcion,
+                    email: email === '' ? null : email,
+                    telefono: telefono === '' ? null : telefono,
                 }
             })
             return ctx.response.status = 200
@@ -127,7 +150,7 @@ module.exports = createCoreController('api::tienda.tienda', ({ strapi }) => ({
     async findOne(ctx){
         const { id: slug } = ctx.params //esto va a ser el slug
         const tienda = await strapi.db.query('api::tienda.tienda').findOne({
-            select: ['id','nombre','descripcion','slug'],
+            select: ['id','nombre','descripcion','slug','email','telefono'],
             where: { slug: slug },
             populate: {admin_tienda: {
                 select: ['id', 'username']

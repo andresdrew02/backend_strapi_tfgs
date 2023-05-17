@@ -28,6 +28,12 @@
     },
     "slug": {
       "type": "string"
+    },
+    "email": {
+      "type": "email"
+    },
+    "telefono": {
+      "type": "string"
     }
   }
 }
