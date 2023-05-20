@@ -5,6 +5,10 @@
  */
 const nameRegex = /^[A-Za-z\s]{0,100}$/
 const descripcionRegex = /^[a-zA-Z0-9!@#$%^&*()_+={[}\]|\\:;"'<,>.?/ -]{50,200}$/
+const decimalRegex = /^\d+(\.\d+)?$/
+const numberRegex = /^\d+$/
+const anotherName = /^.{5,50}$/
+const anotherDescripcion = /^[^\n]{50,500}$/
 
 const checkRegexp = (str, regexp) => {
     const checker = new RegExp(regexp)
@@ -144,7 +148,6 @@ module.exports = createCoreController('api::producto.producto', ({ strapi }) => 
             return ctx.response.status = 403
         }
 
-        
         body.forEach(async e => {
             let ofertaItems;
             try {
@@ -167,14 +170,79 @@ module.exports = createCoreController('api::producto.producto', ({ strapi }) => 
                 return ctx.responses.status = 500
             }
 
-            try{
-                await strapi.entityService.delete('api::producto.producto',e.id)
-            } catch(ex){
+            try {
+                await strapi.entityService.delete('api::producto.producto', e.id)
+            } catch (ex) {
                 console.error(ex)
                 return ctx.responses.status = 500
             }
         })
 
         return ctx.response.status = 200
+    },
+    async create(ctx) {
+        const user = ctx.state.user
+        const body = ctx.request.body
+        const { nombre, descripcion, ppu, categoria, idTienda } = ctx.request.body
+
+        if (!user) {
+            return ctx.response.status = 403
+        }
+
+        if (!user.id) {
+            return ctx.response.status = 403
+        }
+
+        //validar los datos
+        if (!checkRegexp(nombre, anotherName) || !checkRegexp(descripcion, anotherDescripcion) || !checkRegexp(ppu, decimalRegex) || !checkRegexp(categoria, numberRegex) || !checkRegexp(idTienda, numberRegex)) {
+            return response.status(400).send("")
+        }
+
+        //checkear que la categoria exista
+        const db_categoria = await strapi.entityService.findOne('api::categoria.categoria',categoria)
+        if (db_categoria === null){
+            return response.status(400).send("")
+        }
+
+        //la tienda pertenece al usuario que esta intentando crear el producto
+        const tienda = await strapi.entityService.findOne('api::tienda.tienda', idTienda, {
+            fields: ['*'],
+            populate: '*'
+        });
+
+        if (user.id !== tienda.admin_tienda.id) {
+            ctx.response.status = 403
+        }
+
+        //checkeamos que no tiene mas de 20 productos creados en la tienda
+        const productos = await strapi.db.query('api::producto.producto').findMany({
+            select: ['*'],
+            where: {
+                tienda: {
+                    id: idTienda
+                }
+            },
+            orderBy: { publishedAt: 'DESC' }
+        });
+
+        if (productos.length >= 20){
+            ctx.response.status = 400
+        }else{
+            const productoCreado = await strapi.entityService.create('api::producto.producto', {
+                data: {
+                  nombre: nombre,
+                  descripcion: nombre,
+                  precio_unidad: ppu,
+                  tienda: {
+                    id: idTienda
+                  },
+                  categoria: categoria
+                },
+              });
+              return this.transformResponse(productoCreado)
+        }
+
+        return ctx.response.status = 500
+
     }
 }));

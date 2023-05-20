@@ -32,18 +32,21 @@
     "precio_oferta": {
       "type": "decimal"
     },
-    "producto": {
+    "productos": {
       "type": "relation",
-      "relation": "oneToOne",
+      "relation": "oneToMany",
       "target": "api::producto.producto"
     },
     "fotos": {
-      "allowedTypes": [
-        "images"
-      ],
       "type": "media",
       "multiple": true,
-      "required": false
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "slug": {
+      "type": "string"
     }
   }
 }

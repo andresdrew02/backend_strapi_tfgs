@@ -160,7 +160,7 @@ module.exports = createCoreController('api::tienda.tienda', ({ strapi }) => ({
             filters: {tienda: tienda.id},
             populate: {
                 tienda:true,
-                producto:{
+                productos:{
                     populate: {
                         categoria: true
                     }
