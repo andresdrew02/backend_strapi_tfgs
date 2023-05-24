@@ -148,12 +148,13 @@ module.exports = createCoreController('api::producto.producto', ({ strapi }) => 
             return ctx.response.status = 403
         }
 
+        //primero conseguimos las ofertas asociadas, las borramos y despues borramos los productos
         body.forEach(async e => {
             let ofertaItems;
             try {
                 ofertaItems = await strapi
                     .query("api::oferta.oferta")
-                    .findMany({ where: { producto: { id: e.id } } });
+                    .findMany({ where: { productos: { id: e.id } } });
             } catch (ex) {
                 console.error(ex);
                 return ctx.responses.status = 500
@@ -176,6 +177,7 @@ module.exports = createCoreController('api::producto.producto', ({ strapi }) => 
                 console.error(ex)
                 return ctx.responses.status = 500
             }
+
         })
 
         return ctx.response.status = 200
@@ -231,7 +233,7 @@ module.exports = createCoreController('api::producto.producto', ({ strapi }) => 
             const productoCreado = await strapi.entityService.create('api::producto.producto', {
                 data: {
                   nombre: nombre,
-                  descripcion: nombre,
+                  descripcion: descripcion,
                   precio_unidad: ppu,
                   tienda: {
                     id: idTienda

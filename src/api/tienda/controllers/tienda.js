@@ -100,6 +100,35 @@ module.exports = createCoreController('api::tienda.tienda', ({ strapi }) => ({
         if (!id) {
             return ctx.response.status = 400
         }
+
+        //checkeamos que la tienda existe y que pertenece a este usuario
+        const tienda = await strapi.entityService.findOne('api::tienda.tienda',id,{
+            populate:{
+                admin_tienda: true
+            }
+        })
+
+        if (tienda === null || tienda.admin_tienda.id !== user.id){
+            return ctx.response.status = 403
+        }
+
+        //borramos las ofertas y los productos de esa tienda
+        await strapi.db.query('api::oferta.oferta').delete({
+            where: {
+                tienda:{
+                    id: id
+                }
+            }
+        })
+
+        await strapi.db.query('api::producto.producto').delete({
+            where:{
+                tienda:{
+                    id: id
+                }
+            }
+        })
+
         const tiendaBorrada = await strapi.entityService.delete('api::tienda.tienda', id)
         const sanitizedResults = await this.sanitizeOutput(tiendaBorrada, ctx);
         return this.transformResponse(sanitizedResults);
