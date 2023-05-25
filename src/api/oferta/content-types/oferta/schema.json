@@ -47,6 +47,12 @@
     },
     "slug": {
       "type": "string"
+    },
+    "pedidos": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::pedido.pedido",
+      "mappedBy": "ofertas"
     }
   }
 }

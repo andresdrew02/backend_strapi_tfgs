@@ -119,7 +119,7 @@ module.exports = createCoreController('api::producto.producto', ({ strapi }) => 
             return ctx.response.status(403)
         }
 
-        if (!productoOriginal.tienda.admin_tienda.id === user.id) {
+        if (productoOriginal.tienda.admin_tienda.id !== user.id) {
             return ctx.response.status(403)
         }
 
@@ -223,8 +223,7 @@ module.exports = createCoreController('api::producto.producto', ({ strapi }) => 
                 tienda: {
                     id: idTienda
                 }
-            },
-            orderBy: { publishedAt: 'DESC' }
+            }
         });
 
         if (productos.length >= 20){

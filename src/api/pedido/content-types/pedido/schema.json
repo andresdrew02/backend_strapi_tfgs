@@ -8,14 +8,14 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
   "pluginOptions": {},
   "attributes": {
     "usuario": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "admin::user"
+      "target": "plugin::users-permissions.user"
     },
     "precio_final": {
       "type": "decimal",
@@ -40,10 +40,33 @@
       "default": "pendiente_pago",
       "required": true
     },
-    "oferta": {
+    "direccion": {
+      "type": "component",
+      "repeatable": true,
+      "component": "misc.direccion"
+    },
+    "OfertasCantidad": {
+      "type": "json",
+      "required": true
+    },
+    "nombre_facturacion": {
+      "type": "string"
+    },
+    "email_facturacion": {
+      "type": "string"
+    },
+    "tlfo_facturacion": {
+      "type": "string"
+    },
+    "stripe_id": {
+      "type": "text",
+      "required": true
+    },
+    "ofertas": {
       "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::oferta.oferta"
+      "relation": "manyToMany",
+      "target": "api::oferta.oferta",
+      "inversedBy": "pedidos"
     }
   }
 }

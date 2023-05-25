@@ -56,8 +56,9 @@ module.exports = createCoreController('api::oferta.oferta', ({ strapi }) => ({
             limit: pageSize
         })
 
-        const sanitizedResults = await this.sanitizeOutput(ofertas, ctx)
-        return this.transformResponse(sanitizedResults)
+        console
+
+        return this.transformResponse(ofertas)
     },
     async create(ctx) {
         //precio minimo 5 pavos, stock minimo 1, nombre minimo 10 caracteres max 30, descripcion min 50 max 250
