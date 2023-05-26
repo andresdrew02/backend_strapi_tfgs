@@ -27,7 +27,8 @@
     },
     "metodo_pago": {
       "type": "string",
-      "required": true
+      "required": true,
+      "private": true
     },
     "estado": {
       "type": "enumeration",
@@ -47,7 +48,8 @@
     },
     "OfertasCantidad": {
       "type": "json",
-      "required": true
+      "required": true,
+      "private": true
     },
     "nombre_facturacion": {
       "type": "string"
@@ -60,13 +62,18 @@
     },
     "stripe_id": {
       "type": "text",
-      "required": true
+      "required": true,
+      "private": true
     },
     "ofertas": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::oferta.oferta",
       "inversedBy": "pedidos"
+    },
+    "nombre_oferta": {
+      "type": "string",
+      "required": true
     }
   }
 }

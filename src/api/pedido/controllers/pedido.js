@@ -32,6 +32,7 @@ module.exports = createCoreController('api::pedido.pedido', ({ strapi }) => ({
         const metadata = {
             productos: []
         }
+        let nombre_oferta = ''
         for (let i = 0; i < pedido.length; i++) {
             const oferta = await strapi.entityService.findOne('api::oferta.oferta', pedido[i].idOferta, {
                 populate: {
@@ -61,6 +62,7 @@ module.exports = createCoreController('api::pedido.pedido', ({ strapi }) => ({
                 idOferta: oferta.id,
                 cantidad: pedido[i].cantidad
             })
+            nombre_oferta += oferta.nombre + ' + '
         }
 
         const lineItems = ofertas_db
@@ -76,7 +78,7 @@ module.exports = createCoreController('api::pedido.pedido', ({ strapi }) => ({
           }, {});
           
           const duplicados = pedido.filter((item) => cantidadesPorId[item.idOferta] > item.cantidad);
-          
+
           //checkeamos la cantidad todal y la cantidad en stock
           if (duplicados.length > 0){
             for(const [key,value] of Object.entries(cantidadesPorId)){
@@ -98,7 +100,8 @@ module.exports = createCoreController('api::pedido.pedido', ({ strapi }) => ({
             payment_method_types: ["card"],
             metadata: {
                 usuario: user.id,
-                data: JSON.stringify(metadata.productos)
+                data: JSON.stringify(metadata.productos),
+                nombre_oferta: nombre_oferta
             }
         })
 
@@ -131,6 +134,7 @@ module.exports = createCoreController('api::pedido.pedido', ({ strapi }) => ({
         const { metadata, customer_details, amount_total, payment_method_types } = session
         const data = JSON.parse(metadata.data)
         const idUsuario = metadata.usuario
+        const nombre_oferta = metadata.nombre_oferta
         let cantidadTotal = 0
         let idOfertas = []
         data.map(e => {
@@ -139,7 +143,7 @@ module.exports = createCoreController('api::pedido.pedido', ({ strapi }) => ({
         })
 
         //creamos el pedido
-        const pedido = await strapi.entityService.create('api::pedido.pedido',{
+        await strapi.entityService.create('api::pedido.pedido',{
             data:{
                 usuario: idUsuario,
                 precio_final: amount_total/100,
@@ -161,7 +165,8 @@ module.exports = createCoreController('api::pedido.pedido', ({ strapi }) => ({
                 email_facturacion: customer_details.email,
                 tlfo_facturacion: customer_details.phone,
                 OfertasCantidad: metadata.data,
-                stripe_id: session_id
+                stripe_id: session_id,
+                nombre_oferta: nombre_oferta
             }
         })
 
@@ -188,5 +193,30 @@ module.exports = createCoreController('api::pedido.pedido', ({ strapi }) => ({
 
         //redireccionar como pago realizado
         return ctx.redirect(URL_EXITO)
+    },
+    async find(ctx){
+        const user = ctx.state.user
+
+        if (!user) {
+            throw new ForbiddenError('No tiene permisos para realizar esta acción')
+        }
+
+
+        if (!user.id) {
+            throw new ForbiddenError('No tiene permisos para realizar esta acción')
+        }
+
+        const pedidos = await strapi.entityService.findMany('api::pedido.pedido',{
+            filters: {
+                $and: [{
+                    usuario:{
+                        id: user.id
+                    }
+                }]
+            },
+            populate: ['direccion']
+        })
+        const sanitizedResults = await this.sanitizeOutput(pedidos, ctx);
+        return this.transformResponse(sanitizedResults);
     }
 }));
