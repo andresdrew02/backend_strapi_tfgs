@@ -10,4 +10,5 @@ module.exports = [
   'strapi::favicon',
   'strapi::public',
   'global::registerMiddleware',
+  'global::resetPasswordMiddleware'
 ];

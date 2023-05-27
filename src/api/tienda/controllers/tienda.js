@@ -41,15 +41,15 @@ module.exports = createCoreController('api::tienda.tienda', ({ strapi }) => ({
             return ctx.response.status = 409
         }
 
-        if (!checkRegexp(nombre,nameRegex)) {
+        if (!checkRegexp(nombre, nameRegex)) {
             return ctx.response.status(400)
         }
 
-        if (telefono !== '' && !checkRegexp(telefono,numberRegex)){
+        if (telefono !== '' && !checkRegexp(telefono, numberRegex)) {
             return ctx.response.status(400)
         }
-    
-        if (email !== '' && !checkRegexp(email,mailRegex)){
+
+        if (email !== '' && !checkRegexp(email, mailRegex)) {
             return ctx.response.status(400)
         }
 
@@ -102,28 +102,28 @@ module.exports = createCoreController('api::tienda.tienda', ({ strapi }) => ({
         }
 
         //checkeamos que la tienda existe y que pertenece a este usuario
-        const tienda = await strapi.entityService.findOne('api::tienda.tienda',id,{
-            populate:{
+        const tienda = await strapi.entityService.findOne('api::tienda.tienda', id, {
+            populate: {
                 admin_tienda: true
             }
         })
 
-        if (tienda === null || tienda.admin_tienda.id !== user.id){
+        if (tienda === null || tienda.admin_tienda.id !== user.id) {
             return ctx.response.status = 403
         }
 
         //borramos las ofertas y los productos de esa tienda
         await strapi.db.query('api::oferta.oferta').delete({
             where: {
-                tienda:{
+                tienda: {
                     id: id
                 }
             }
         })
 
         await strapi.db.query('api::producto.producto').delete({
-            where:{
-                tienda:{
+            where: {
+                tienda: {
                     id: id
                 }
             }
@@ -145,15 +145,15 @@ module.exports = createCoreController('api::tienda.tienda', ({ strapi }) => ({
             return ctx.response.status = 400
         }
 
-        if (!checkRegexp(nombre,nameRegex)) {
+        if (!checkRegexp(nombre, nameRegex)) {
             return ctx.response.status(400)
         }
 
-        if (telefono !== '' && !checkRegexp(telefono,numberRegex)){
+        if (telefono !== '' && !checkRegexp(telefono, numberRegex)) {
             return ctx.response.status(400)
         }
-    
-        if (email !== '' && !checkRegexp(email,mailRegex)){
+
+        if (email !== '' && !checkRegexp(email, mailRegex)) {
             return ctx.response.status(400)
         }
 
@@ -176,29 +176,70 @@ module.exports = createCoreController('api::tienda.tienda', ({ strapi }) => ({
         return ctx.response.status = 403
 
     },
-    async findOne(ctx){
+    async findOne(ctx) {
         const { id: slug } = ctx.params //esto va a ser el slug
         const tienda = await strapi.db.query('api::tienda.tienda').findOne({
-            select: ['id','nombre','descripcion','slug','email','telefono'],
+            select: ['id', 'nombre', 'descripcion', 'slug', 'email', 'telefono'],
             where: { slug: slug },
-            populate: {admin_tienda: {
-                select: ['id', 'username']
-            }}
-        })
-        const ofertas = await strapi.entityService.findMany('api::oferta.oferta',{
-            filters: {tienda: tienda.id},
             populate: {
-                tienda:true,
-                productos:{
+                admin_tienda: {
+                    select: ['id', 'username']
+                },
+                valoraciones: true
+            }
+        })
+        const ofertas = await strapi.entityService.findMany('api::oferta.oferta', {
+            filters: { tienda: tienda.id },
+            populate: {
+                tienda: true,
+                productos: {
                     populate: {
                         categoria: true
                     }
                 },
-                fotos:true
+                fotos: true
             },
             sort: { createdAt: 'DESC' }
         })
 
         return this.transformResponse(tienda, ofertas);
+    },
+    async ponerValoracion(ctx) {
+        const { slug } = ctx.params
+        const { valoracion, comentario } = ctx.request.body
+        const user = ctx.state.user
+        if (!user || !user.id) {
+            return ctx.response.status = 403
+        }
+
+        if (!valoracion, !comentario || valoracion > 5 || valoracion < 0) {
+            return ctx.response.status = 400
+        }
+
+        //recoger tienda
+        const tienda = await strapi.db.query('api::tienda.tienda').findOne({
+            select: ['id'],
+            where: { slug: slug },
+        })
+
+        if (!tienda) {
+            return ctx.response.status = 400
+        }
+
+        //postear comentario
+        const valora = await strapi.db.query('api::resenia-tienda.resenia-tienda').create({
+            data: {
+                resenia: comentario,
+                valoracion: valoracion,
+                tienda: tienda.id,
+                usuario: user.id
+            }
+        });
+
+        if (!valora) {
+            return ctx.response.status = 400
+        }
+
+        return ctx.response.status = 200
     }
 }));

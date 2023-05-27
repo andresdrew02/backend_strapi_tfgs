@@ -18,7 +18,6 @@ module.exports = createCoreController('api::pedido.pedido', ({ strapi }) => ({
             throw new ForbiddenError('No tiene permisos para realizar esta acción')
         }
 
-
         if (!user.id) {
             throw new ForbiddenError('No tiene permisos para realizar esta acción')
         }
@@ -88,6 +87,15 @@ module.exports = createCoreController('api::pedido.pedido', ({ strapi }) => ({
                 }
             }
           }
+
+          let totalPrecio = 0
+          ofertas_db.map(e => {
+            totalPrecio += e.precio_oferta_oferta
+          })
+          if (totalPrecio < 5){
+            throw new ApplicationError('El pedido mínimo es de 5€')
+          }
+
         //creamos la sesión del pago y redireccionamos al usuario
         const session = await stripe.checkout.sessions.create({
             mode: "payment",

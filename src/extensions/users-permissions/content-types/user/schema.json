@@ -102,6 +102,12 @@
       ],
       "default": "true",
       "required": false
+    },
+    "valoraciones": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::resenia-tienda.resenia-tienda",
+      "mappedBy": "usuario"
     }
   }
 }

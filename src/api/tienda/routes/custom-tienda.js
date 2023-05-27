@@ -8,5 +8,13 @@ module.exports = {
             policies: []
         }
       },
+      {
+        method: 'POST',
+        path: '/tienda/:slug/valorar', 
+        handler: 'tienda.ponerValoracion',
+        config:{
+            policies: []
+        }
+      },
     ]
   }

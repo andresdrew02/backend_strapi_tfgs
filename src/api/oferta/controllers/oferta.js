@@ -11,7 +11,7 @@ const { ForbiddenError, ApplicationError } = utils.errors
 
 const minPriceRegex = /^(5|[6-9]\d*|\d+\.[0-9]{1,})\s?€?$/
 const minStockRegex = /^[1-9]\d*$/
-const nombreRegex = /^[A-Za-z ]{10,30}$/
+const nombreRegex = /^[A-Za-z ]{10,50}$/
 const descripcionRegex = /^.{50,250}$/
 
 const checkRegexp = (str, regexp) => {
@@ -122,7 +122,7 @@ module.exports = createCoreController('api::oferta.oferta', ({ strapi }) => ({
         }
 
         if (!checkRegexp(nombre, nombreRegex)) {
-            throw new ApplicationError('El nombre no es válido, debe de tener entre 10 y 30 letras')
+            throw new ApplicationError('El nombre no es válido, debe de tener entre 10 y 50 letras')
         }
 
         if (!checkRegexp(descripcion, descripcionRegex)) {
@@ -241,19 +241,16 @@ module.exports = createCoreController('api::oferta.oferta', ({ strapi }) => ({
             }
         })
 
-        if (db_productos !== null && db_productos.length === 1) {
-            if (Array.isArray(productos)) {
-                throw new ApplicationError('Alguno de los productos seleccionados es incorrecto.')
-            } else {
-                if (db_productos[0].id !== parseInt(productos)) {
-                    console.log(db_productos[0].id, productos)
-                    throw new ApplicationError('Alguno de los productos seleccionados es incorrecto.')
-                }
-            }
-        } else {
-            if (db_productos.length !== productos.length) {
-                throw new ApplicationError('Alguno de los productos seleccionados es incorrecto.')
-            }
+        if (!Array.isArray(productos)){
+            throw new ApplicationError('Alguno de los productos seleccionados es incorrecto.')
+        }
+
+        if (db_productos.length !== productos.length){
+            throw new ApplicationError('Alguno de los productos seleccionados es incorrecto.')
+        }
+
+        if (productos.length === 0){
+            throw new ApplicationError('Alguno de los productos seleccionados es incorrecto.')
         }
 
         db_productos.map(e => precioFinalOferta += e.precio_unidad)
@@ -263,7 +260,7 @@ module.exports = createCoreController('api::oferta.oferta', ({ strapi }) => ({
         }
 
         if (!checkRegexp(nombre, nombreRegex)) {
-            throw new ApplicationError('El nombre no es válido, debe de tener entre 10 y 30 letras')
+            throw new ApplicationError('El nombre no es válido, debe de tener entre 10 y 50 letras')
         }
 
         if (!checkRegexp(descripcion, descripcionRegex)) {

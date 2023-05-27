@@ -3,8 +3,8 @@
 /**
  * producto controller
  */
-const nameRegex = /^[A-Za-z\s]{0,100}$/
-const descripcionRegex = /^[a-zA-Z0-9!@#$%^&*()_+={[}\]|\\:;"'<,>.?/ -]{50,200}$/
+const nameRegex = /^[A-Za-zñÑ\s]{0,100}$/
+const descripcionRegex = /^[a-zA-Z0-9!@#$%^&ñÑ*()_+={[}\]|\\:;"'<,>.?/ -]{50,500}$/
 const decimalRegex = /^\d+(\.\d+)?$/
 const numberRegex = /^\d+$/
 const anotherName = /^.{5,50}$/

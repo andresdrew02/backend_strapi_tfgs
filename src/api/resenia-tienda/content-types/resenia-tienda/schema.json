@@ -8,25 +8,29 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
   "pluginOptions": {},
   "attributes": {
     "usuario": {
       "type": "relation",
-      "relation": "oneToOne",
-      "target": "admin::user"
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "valoraciones"
     },
     "resenia": {
-      "type": "text"
+      "type": "text",
+      "required": true
     },
     "valoracion": {
-      "type": "decimal"
+      "type": "integer",
+      "required": true
     },
     "tienda": {
       "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::tienda.tienda"
+      "relation": "manyToOne",
+      "target": "api::tienda.tienda",
+      "inversedBy": "valoraciones"
     }
   }
 }
