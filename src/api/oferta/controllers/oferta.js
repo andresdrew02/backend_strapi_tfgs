@@ -241,11 +241,14 @@ module.exports = createCoreController('api::oferta.oferta', ({ strapi }) => ({
             }
         })
 
-        if (!Array.isArray(productos)){
+        console.log(productos)
+        console.log(db_productos)
+
+        if (!Array.isArray(productos) && db_productos.length !== 1){
             throw new ApplicationError('Alguno de los productos seleccionados es incorrecto.')
         }
 
-        if (db_productos.length !== productos.length){
+        if (db_productos.length !== 1 && db_productos.length !== productos.length){
             throw new ApplicationError('Alguno de los productos seleccionados es incorrecto.')
         }
 
