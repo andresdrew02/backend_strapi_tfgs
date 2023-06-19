@@ -100,9 +100,12 @@ module.exports = createCoreController('api::oferta.oferta', ({ strapi }) => ({
         })
 
         //Cuando solo se selecciona un producto, viene como un integer sin array
+        console.log(productos)
         if (db_productos !== null && db_productos.length === 1) {
             if (Array.isArray(productos)) {
-                throw new ApplicationError('Alguno de los productos seleccionados es incorrecto.')
+                if (db_productos.length !== productos.length){
+                    throw new ApplicationError('Alguno de los productos seleccionados es incorrecto.')
+                }
             } else {
                 if (db_productos[0].id !== parseInt(productos)) {
                     console.log(db_productos[0].id, productos)
